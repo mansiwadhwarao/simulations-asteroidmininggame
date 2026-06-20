@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Day 5 of the Summer Bootcamp: Asteroid Mining Rush Game. An interactive resource management and probability optimization web game.">
+  <title>Day 5: Asteroid Mining Rush Game & Optimization Dashboard</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Glow Background Orbs -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+  <div class="bg-glow bg-glow-3"></div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <div class="logo-brand">
+          <a href="https://mind-plexus.com" target="_blank" rel="noopener noreferrer" style="text-decoration: none; border: none; display: block;">
+            <img src="logo_landscape_black.png" alt="Mindplexus Logo" class="mindplexus-logo" style="height: 32px; width: auto; border: none; display: block;">
+          </a>
+        </div>
+        <div class="logo-separator">|</div>
+        <div class="logo-icon">🚀</div>
+        <div class="logo-text">
+          <h1 class="game-title-header">ASTEROID MINING RUSH</h1>
+          <div class="student-credits">Built by Krithikesh, Sathya and Vikram</div>
+        </div>
+      </div>
+      
+      <!-- Nav Tabs -->
+      <nav class="app-tabs">
+        <button type="button" class="tab-btn active" id="tab-btn-sim" data-tab="simulator-view">
+          🎮 Asteroid Mine
+        </button>
+        <button type="button" class="tab-btn" id="tab-btn-guide" data-tab="guide-view">
+          📚 Student Guide
+        </button>
+        <button type="button" class="tab-btn" id="tab-btn-leaderboard" data-tab="leaderboard-view">
+          🏆 Leaderboard
+        </button>
+      </nav>
+      
+      <!-- Pilot Name Input -->
+      <div class="pilot-name-box">
+        <label for="player-name-input">👤 Pilot Name:</label>
+        <input type="text" id="player-name-input" class="player-name-input" value="Miner One" maxlength="15" />
+      </div>
+
+      <!-- Sound toggle -->
+      <button type="button" class="sound-toggle-btn" id="sound-toggle-btn" aria-label="Toggle Sound">
+        <span class="icon" id="sound-icon">🔊</span>
+        <span class="text">Sound On</span>
+      </button>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- Tab 1: Simulator/Game View -->
+      <section class="tab-content active-content" id="simulator-view">
+        <div class="grid-layout">
+          
+          <!-- Left Column: Interactive Asteroid & Mining Zone -->
+          <div class="card game-card" style="position: relative;">
+            <!-- Paused overlay -->
+            <div class="paused-overlay hidden" id="paused-overlay">
+              <div class="paused-title">EXPEDITION PAUSED</div>
+              <div class="paused-subtitle">Mining tools and countdown clock are offline.</div>
+              <button type="button" class="btn btn-action" id="btn-resume-overlay" style="margin-top: 15px; width: auto; padding: 10px 25px;">
+                🎮 Resume Game
+              </button>
+            </div>
+
+            <div class="game-status-header">
+              <div class="timer-display">
+                <span class="status-lbl">TIME REMAINING</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="status-val timer-digital" id="game-timer">05:00</span>
+                  <button type="button" class="btn-pause-inline" id="btn-pause-game" title="Pause Game">⏸️ Pause</button>
+                </div>
+              </div>
+              
+              <div class="fuel-display-header" id="header-fuel-display">
+                <span class="status-lbl">⛽ EXCAVATOR FUEL</span>
+                <span class="status-val" id="game-fuel-top" style="color: var(--accent-gold);">0.0 L</span>
+              </div>
+
+              <div class="net-worth-display">
+                <span class="status-lbl">TOTAL NET WORTH</span>
+                <span class="status-val text-gradient" id="game-net-worth">$0</span>
+              </div>
+            </div>
+
+            <!-- Central Mining Area -->
+            <div class="mining-area">
+              <div class="asteroid-badge" id="asteroid-badge">
+                🛰️ Current Asteroid: <span id="asteroid-name" class="asteroid-titan-text">TITAN</span> <span id="asteroid-distance" class="distance-text">(Near Earth)</span>
+              </div>
+              
+              <div class="floating-asteroid-container">
+                <div class="particle-emitter" id="particle-emitter"></div>
+                <div class="asteroid-wrapper" id="asteroid-wrapper">
+                  <div class="asteroid" id="asteroid-target">
+                    <!-- Crater details inside asteroid using CSS or SVG -->
+                    <div class="crater c1"></div>
+                    <div class="crater c2"></div>
+                    <div class="crater c3"></div>
+                    <div class="crater c4"></div>
+                    <div class="crater c5"></div>
+                    <span class="dig-flash-text" id="dig-flash-text"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dig Progress & Action Buttons -->
+              <div class="dig-controls">
+                <div class="progress-bar-container">
+                  <div class="progress-bar-fill" id="dig-progress-bar"></div>
+                  <span class="progress-text" id="dig-progress-text">Ready to Dig</span>
+                </div>
+                
+                <div class="mining-actions-row">
+                  <button type="button" class="btn btn-action" id="btn-manual-dig">
+                    ⛏️ Dig Asteroid
+                  </button>
+                  
+                  <div class="excavator-toggle-wrapper">
+                    <button type="button" class="btn btn-action btn-secondary btn-locked" id="btn-toggle-excavator" disabled>
+                      🤖 Run Excavator (Locked)
+                    </button>
+                    <div class="fuel-status-subtext" id="fuel-display-subtext">No Excavator owned</div>
+                  </div>
+                </div>
+                
+                <!-- Teleportation Panel -->
+                <div class="teleport-panel" id="teleport-panel-container">
+                  <button type="button" class="btn btn-teleport disabled" id="btn-teleport-void" disabled>
+                    🌌 Teleport to VOID
+                  </button>
+                  <div class="teleport-desc" id="teleport-desc-text">Requires $100,000 net worth to travel.</div>
+                </div>
+
+                <!-- Storm Warning & Lock/Shield Activation Button -->
+                <div class="storm-panel hidden" id="storm-panel-container" style="margin-top: 15px; background: rgba(255, 45, 85, 0.15); border: 2px dashed var(--accent-ruby); border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 0 15px rgba(255, 45, 85, 0.3);">
+                  <div id="storm-warning-message" style="font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; color: #ff2d55; margin-bottom: 8px; text-shadow: 0 0 8px rgba(255, 45, 85, 0.4); text-transform: uppercase;">
+                    ⚠️ WARNING: MASSIVE DUST STORM IN 10s!
+                  </div>
+                  <button type="button" class="btn btn-action" id="btn-lock-shield" style="background: linear-gradient(135deg, #ffd700 0%, #cc8e35 100%); color: #000; font-weight: 800; text-shadow: none; box-shadow: var(--shadow-gold); width: 100%; border: none; padding: 10px; font-size: 0.95rem; cursor: pointer;" disabled>
+                    🔒 ACTIVATE STORM SHIELD
+                  </button>
+                </div>
+
+                <!-- Seismic Warning Panel -->
+                <div class="seismic-panel hidden" id="seismic-panel-container" style="margin-top: 15px; background: rgba(255, 140, 0, 0.15); border: 2px dashed var(--accent-gold); border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);">
+                  <div id="seismic-warning-message" style="font-family: var(--font-display); font-size: 0.9rem; font-weight: bold; color: #ff9100; text-shadow: 0 0 8px rgba(255, 145, 0, 0.4); text-transform: uppercase;">
+                    ⚠️ SEISMIC WARNING: TREMORS DETECTED! EARTHQUAKE IN 10s!
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dashboard Telemetry -->
+            <div class="telemetry-grid">
+              <div class="telemetry-tile">
+                <span class="tile-lbl">Current Shovel</span>
+                <strong class="tile-val" id="telemetry-shovel">Rusty Shovel</strong>
+              </div>
+              <div class="telemetry-tile">
+                <span class="tile-lbl">Speed Upgrades</span>
+                <strong class="tile-val" id="telemetry-loosener">None (1x Speed)</strong>
+              </div>
+              <div class="telemetry-tile">
+                <span class="tile-lbl">Metal Detector</span>
+                <strong class="tile-val" id="telemetry-detector">Not Equipped</strong>
+              </div>
+              <div class="telemetry-tile">
+                <span class="tile-lbl">Total Digs</span>
+                <strong class="tile-val" id="telemetry-digs">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Middle/Right Column: Wallet, Shop & Inventory -->
+          <div class="card inventory-card">
+            <div class="card-header">
+              <h2>Wallet &amp; Shop</h2>
+              <div class="wallet-pill-box">
+                <div class="wallet-pill cash-pill">💵 <span id="wallet-cash">$0</span></div>
+                <div class="wallet-pill coin-pill" id="coin-pill-container">🪙 <span id="wallet-coins">0 Coins</span></div>
+                <div class="wallet-pill pearl-pill hidden" id="pearl-pill-container">🦪 <span id="wallet-pearls">0 Pearls</span></div>
+                <div class="wallet-pill crystal-pill hidden" id="crystal-pill-container">🔮 <span id="wallet-crystals">0 Crystals</span></div>
+              </div>
+            </div>
+
+            <div class="app-split-container">
+              <!-- Inventory Panel -->
+              <div class="inventory-section">
+                <div class="section-title-row">
+                  <h3>Mined Inventory</h3>
+                  <button type="button" class="btn btn-secondary btn-xs" id="btn-sell-all">Sell All Ores</button>
+                </div>
+
+                <!-- Ticker Banner for Ores Price Appreciation -->
+                <div class="appreciation-banner">
+                  <span class="banner-icon">⏳</span>
+                  <span class="banner-text">Holding ores increases Gold, Amethyst, Ruby value every 10s:</span>
+                  <strong class="ticker-countdown" id="appreciation-countdown">10s</strong>
+                </div>
+
+                <div class="ore-list" id="ore-list-container">
+                  <!-- Iron Ore Row -->
+                  <div class="ore-item" id="ore-item-iron">
+                    <div class="ore-icon-name">
+                      <span class="ore-icon">⬜</span>
+                      <div class="ore-meta">
+                        <span class="ore-name">Iron Ore</span>
+                        <span class="ore-count-val" id="count-iron">0 held</span>
+                      </div>
+                    </div>
+                    <div class="ore-value-controls">
+                      <div class="ore-price-box">
+                        <span class="ore-price" id="price-iron">$50</span>
+                        <span class="ore-change flat">+$0 (0%)</span>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-sell" id="btn-sell-iron" disabled>Sell</button>
+                    </div>
+                  </div>
+
+                  <!-- Copper Ore Row -->
+                  <div class="ore-item" id="ore-item-copper">
+                    <div class="ore-icon-name">
+                      <span class="ore-icon">🟫</span>
+                      <div class="ore-meta">
+                        <span class="ore-name">Copper Ore</span>
+                        <span class="ore-count-val" id="count-copper">0 held</span>
+                      </div>
+                    </div>
+                    <div class="ore-value-controls">
+                      <div class="ore-price-box">
+                        <span class="ore-price" id="price-copper">$50</span>
+                        <span class="ore-change flat">+$0 (0%)</span>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-sell" id="btn-sell-copper" disabled>Sell</button>
+                    </div>
+                  </div>
+
+                  <!-- Gold Ore Row -->
+                  <div class="ore-item" id="ore-item-gold">
+                    <div class="ore-icon-name">
+                      <span class="ore-icon">🟨</span>
+                      <div class="ore-meta">
+                        <span class="ore-name">Gold Ore</span>
+                        <span class="ore-count-val" id="count-gold">0 held</span>
+                      </div>
+                    </div>
+                    <div class="ore-value-controls">
+                      <div class="ore-price-box">
+                        <span class="ore-price" id="price-gold">$200</span>
+                        <span class="ore-change positive" id="change-gold">+$20 (+10%)</span>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-sell" id="btn-sell-gold" disabled>Sell</button>
+                    </div>
+                  </div>
+
+                  <!-- Amethyst Ore Row -->
+                  <div class="ore-item" id="ore-item-amethyst">
+                    <div class="ore-icon-name">
+                      <span class="ore-icon">🟪</span>
+                      <div class="ore-meta">
+                        <span class="ore-name">Amethyst</span>
+                        <span class="ore-count-val" id="count-amethyst">0 held</span>
+                      </div>
+                    </div>
+                    <div class="ore-value-controls">
+                      <div class="ore-price-box">
+                        <span class="ore-price" id="price-amethyst">$300</span>
+                        <span class="ore-change positive" id="change-amethyst">+$60 (+20%)</span>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-sell" id="btn-sell-amethyst" disabled>Sell</button>
+                    </div>
+                  </div>
+
+                  <!-- Ruby Ore Row -->
+                  <div class="ore-item" id="ore-item-ruby">
+                    <div class="ore-icon-name">
+                      <span class="ore-icon">🟥</span>
+                      <div class="ore-meta">
+                        <span class="ore-name">Ruby</span>
+                        <span class="ore-count-val" id="count-ruby">0 held</span>
+                      </div>
+                    </div>
+                    <div class="ore-value-controls">
+                      <div class="ore-price-box">
+                        <span class="ore-price" id="price-ruby">$500</span>
+                        <span class="ore-change positive" id="change-ruby">+$150 (+30%)</span>
+                      </div>
+                      <button type="button" class="btn btn-sm btn-sell" id="btn-sell-ruby" disabled>Sell</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Shop Panel -->
+              <div class="shop-section">
+                <h3>Mining Outpost (Shop)</h3>
+                
+                <div class="shop-grid">
+                  <!-- Purchase Excavator (Cash) -->
+                  <div class="shop-item" id="shop-item-excavator">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">🤖 Auto Excavator</span>
+                      <span class="shop-item-desc">Digs automatically (1s rate). Requires fuel.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-cash" id="btn-buy-excavator">
+                      Buy: $5,000
+                    </button>
+                  </div>
+
+                  <!-- Purchase Fuel (Cash) -->
+                  <div class="shop-item" id="shop-item-fuel">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">⛽ Fuel (1 Litre)</span>
+                      <span class="shop-item-desc">Powers the excavator for 10 seconds.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-cash" id="btn-buy-fuel">
+                      Buy: $100
+                    </button>
+                  </div>
+
+                  <!-- Purchase Titanium Shovel (Coins) -->
+                  <div class="shop-item" id="shop-item-shovel">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">⛏️ Shiny Titanium Shovel</span>
+                      <span class="shop-item-desc">Doubles manual digging speed. Needs no fuel.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-coins" id="btn-buy-shovel">
+                      Equip: 2 Coins
+                    </button>
+                  </div>
+
+                  <!-- Purchase Dirt Loosener (Coins) -->
+                  <div class="shop-item" id="shop-item-loosener">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">🌀 Dirt Loosener Attachment</span>
+                      <span class="shop-item-desc">Speeds up all digging (shovel &amp; excavator) by 50%.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-coins" id="btn-buy-loosener">
+                      Equip: 3 Coins
+                    </button>
+                  </div>
+
+                  <!-- Purchase Metal Detector (Coins) -->
+                  <div class="shop-item" id="shop-item-detector">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">🔍 Metal Detector</span>
+                      <span class="shop-item-desc">Triples probability of Gold, Amethyst, and Ruby drops.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-coins" id="btn-buy-detector">
+                      Equip: 10 Coins
+                    </button>
+                  </div>
+
+                  <!-- Purchase Extra Time (Coins) -->
+                  <div class="shop-item" id="shop-item-time">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">⏳ Quantum Time Extender</span>
+                      <span class="shop-item-desc">Injects an extra 60 seconds into the game clock.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-coins" id="btn-buy-time">
+                      Extend: 1 Coin
+                    </button>
+                  </div>
+
+                  <!-- Purchase Storm Shield Gear (Cash) -->
+                  <div class="shop-item" id="shop-item-protection">
+                    <div class="shop-meta">
+                      <span class="shop-item-title">🛡️ Storm Shield Gear</span>
+                      <span class="shop-item-desc">Unlocks storm shield lock button during dust storms to protect assets.</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-buy-cash" id="btn-buy-storm-protection">
+                      Buy: $10,000
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Columns: Graphs, Math Convergence & Console -->
+          <div class="card chart-stats-card grid-span-all">
+            <div class="bottom-layout-grid">
+              
+              <!-- Canvas Net Worth Chart -->
+              <div class="bottom-block chart-block">
+                <h3>Net Worth Performance</h3>
+                <div class="chart-wrapper">
+                  <canvas id="net-worth-canvas" width="450" height="200"></canvas>
+                </div>
+              </div>
+
+              <!-- Mathematical Convergence Table -->
+              <div class="bottom-block table-block">
+                <h3>Empirical Probability Convergence</h3>
+                <div class="table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Resource</th>
+                        <th>Theoretical Prob.</th>
+                        <th>Actual Mine Count</th>
+                        <th>Actual Drop Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="res-row iron">
+                        <td>⬜ Iron Ore</td>
+                        <td id="theo-prob-iron">40.0%</td>
+                        <td id="act-count-iron">0</td>
+                        <td id="act-rate-iron">0.0%</td>
+                      </tr>
+                      <tr class="res-row copper">
+                        <td>🟫 Copper Ore</td>
+                        <td id="theo-prob-copper">40.0%</td>
+                        <td id="act-count-copper">0</td>
+                        <td id="act-rate-copper">0.0%</td>
+                      </tr>
+                      <tr class="res-row gold">
+                        <td>🟨 Gold Ore</td>
+                        <td id="theo-prob-gold">10.0%</td>
+                        <td id="act-count-gold">0</td>
+                        <td id="act-rate-gold">0.0%</td>
+                      </tr>
+                      <tr class="res-row amethyst">
+                        <td>🟪 Amethyst Ore</td>
+                        <td id="theo-prob-amethyst">6.0%</td>
+                        <td id="act-count-amethyst">0</td>
+                        <td id="act-rate-amethyst">0.0%</td>
+                      </tr>
+                      <tr class="res-row ruby">
+                        <td>🟥 Ruby Ore</td>
+                        <td id="theo-prob-ruby">4.0%</td>
+                        <td id="act-count-ruby">0</td>
+                        <td id="act-rate-ruby">0.0%</td>
+                      </tr>
+                      <tr class="res-row coins">
+                        <td>🪙 Extra Coins</td>
+                        <td id="theo-prob-coins">20.0%</td>
+                        <td id="act-count-coins">0</td>
+                        <td id="act-rate-coins">0.0%</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Terminal Logging Console -->
+              <div class="bottom-block console-block">
+                <div class="console-header">
+                  <h3>Mining Telemetry Terminal</h3>
+                  <button type="button" class="btn btn-secondary btn-xs" id="btn-clear-console">Clear</button>
+                </div>
+                <div class="log-console" id="log-console">
+                  <p class="console-placeholder">> Spaceship landing checklist complete. Mining modules initialized.</p>
+                  <p class="console-placeholder">> Equip your rusty shovel and click the asteroid to begin mining!</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 2: Excel Model View -->
+      <section class="tab-content" id="excel-view">
+        <div class="excel-sandbox-container">
+          
+          <div class="sandbox-intro-row">
+            <div class="sandbox-title">
+              <h2>Interactive MS Excel Logic Model</h2>
+              <p>This sandbox runs the mathematical simulation engine behind the game. Edit any cell in the yellow fields, and watch the game mechanics, drop rates, and prices adapt instantly!</p>
+            </div>
+            <div class="sandbox-actions">
+              <button type="button" class="btn btn-secondary" id="btn-reset-excel-model">
+                Reset Sheet Defaults
+              </button>
+            </div>
+          </div>
+          
+          <!-- Excel Sheet UI -->
+          <div class="excel-sheet-card">
+            <div class="excel-formula-bar">
+              <div class="cell-address" id="fx-cell-address">A1</div>
+              <div class="fx-symbol">fx</div>
+              <input type="text" class="formula-input" id="fx-formula-input" readonly placeholder="Select a cell to view formula/value">
+            </div>
+            
+            <div class="excel-grid-scroll">
+              <table class="excel-table">
+                <thead>
+                  <tr>
+                    <th class="col-head index-col"></th>
+                    <th class="col-head">A</th>
+                    <th class="col-head">B</th>
+                    <th class="col-head">C</th>
+                    <th class="col-head">D</th>
+                    <th class="col-head">E</th>
+                    <th class="col-head">F</th>
+                    <th class="col-head">G</th>
+                    <th class="col-head">H</th>
+                    <th class="col-head">I</th>
+                    <th class="col-head">J</th>
+                    <th class="col-head">K</th>
+                    <th class="col-head">L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Title Row -->
+                  <tr>
+                    <td class="row-head">1</td>
+                    <td></td>
+                    <td colspan="11" class="sheet-title-cell font-bold text-left" data-cell="B1">
+                      ASTEROID MINING RUSH GAME CONFIGURATION MODEL
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">2</td>
+                    <td colspan="12"></td>
+                  </tr>
+
+                  <!-- Section: Core Game Settings / Titan variables -->
+                  <tr>
+                    <td class="row-head">3</td>
+                    <td></td>
+                    <td colspan="3" class="section-title-cell font-bold text-left" data-cell="B3">Core Game Variables (TITAN)</td>
+                    <td colspan="8"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">4</td>
+                    <td></td>
+                    <td colspan="6" class="label-cell italic color-grey" data-cell="C4">Starting Asteroid close to Earth. Travel time: half a day to 'TITAN'</td>
+                    <td colspan="5"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">5</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">6</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C6">Initial Timer for TITAN (seconds)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell font-bold text-right color-yellow-bg" data-cell="E6" id="cell-e6" tabindex="0">300</td>
+                    <td colspan="7" class="label-cell italic color-grey">5 minutes duration</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">7</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C7">Starting Money in the Wallet ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell font-bold text-right color-yellow-bg" data-cell="E7" id="cell-e7" tabindex="0">0</td>
+                    <td></td>
+                    <td></td>
+                    <td colspan="2" class="label-cell italic color-grey" data-cell="I7">With the wallet, you can buy gear</td>
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">8</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C8">Starting Tool (Rusty Shovel)</td>
+                    <td></td>
+                    <td class="excel-cell text-right color-grey" data-cell="E8" id="cell-e8">0</td>
+                    <td colspan="7" class="label-cell italic color-grey" data-cell="C8">All players start with a slow, rusty shovel</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">9</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C9">Use Money to buy Excavator ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E9" id="cell-e9" tabindex="0">5000</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell font-bold" data-cell="I9">Gear for TITAN</td>
+                    <td class="label-cell font-bold" data-cell="J9">Feature</td>
+                    <td class="label-cell font-bold text-right" data-cell="K9">Cost in Coins</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">10</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C10">Use Money to buy Fuel ($ per Litre)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E10" id="cell-e10" tabindex="0">100</td>
+                    <td class="label-cell text-center" data-cell="F10">1 L</td>
+                    <td class="label-cell" data-cell="G10">Litre of Fuel</td>
+                    <td></td>
+                    <td class="label-cell" data-cell="I10">Shiny Titanium Shovel</td>
+                    <td class="label-cell color-grey" data-cell="J10">allows digging ores without excavator and without fuel</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K10" id="cell-k10" tabindex="0">2</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">11</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C11">Travel to VOID Cost ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E11" id="cell-e11" tabindex="0">100000</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell" data-cell="I11">Dirt Loosener</td>
+                    <td class="label-cell color-grey" data-cell="J11">This attaches to shovel or excavator and allows faster digging</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K11" id="cell-k11" tabindex="0">3</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">12</td>
+                    <td></td>
+                    <td colspan="6" class="label-cell italic color-grey" data-cell="C12">All the balance money from TITAN travels to VOID</td>
+                    <td></td>
+                    <td class="label-cell" data-cell="I12">Metal Detector</td>
+                    <td class="label-cell color-grey" data-cell="J12">triples the probability of finding gold, amethyst and ruby</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K12" id="cell-k12" tabindex="0">10</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">13</td>
+                    <td></td>
+                    <td colspan="6" class="label-cell italic color-grey" data-cell="C13">In VOID, players start with a shiny shovel, and initial timer is set to 10 minutes</td>
+                    <td></td>
+                    <td class="label-cell" data-cell="I13">Quantum Time Extender</td>
+                    <td class="label-cell color-grey" data-cell="J13">gives you an extra 60 seconds</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K13" id="cell-k13" tabindex="0">1</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">14</td>
+                    <td></td>
+                    <td colspan="6" class="label-cell italic color-grey" data-cell="C14">Use the teleport button to complete the travel from TITAN TO VOID</td>
+                    <td colspan="5"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">15</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">16</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">17</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">18</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">19</td>
+                    <td colspan="12"></td>
+                  </tr>
+
+                  <!-- Section: Titan Ores Economics -->
+                  <tr>
+                    <td class="row-head">20</td>
+                    <td></td>
+                    <td colspan="3" class="section-title-cell font-bold text-left" data-cell="C20">TITAN Ores Economics</td>
+                    <td colspan="2" class="label-cell italic color-grey" data-cell="F20">Hold increases value over time</td>
+                    <td></td>
+                    <td class="label-cell font-bold text-right">Expected Gross EV:</td>
+                    <td class="excel-cell formula-cell text-right font-bold" data-cell="I20" id="cell-i20" data-formula="=SUM(H21:H25)">98.00</td>
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr class="font-bold">
+                    <td class="row-head">21</td>
+                    <td class="label-cell text-center" data-cell="A21">ORES</td>
+                    <td class="label-cell text-center" data-cell="B21">#</td>
+                    <td class="label-cell" data-cell="C21">Ore Name</td>
+                    <td class="label-cell text-right" data-cell="D21">Probability</td>
+                    <td class="label-cell text-right" data-cell="E21">Base Value ($)</td>
+                    <td class="label-cell text-right" data-cell="F21">Appreciation Rate</td>
+                    <td class="label-cell" data-cell="G21">Appreciation Period</td>
+                    <td class="label-cell text-right" data-cell="H21">Expected Value Contribution ($)</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">21</td>
+                    <td class="label-cell font-bold text-center">ORES</td>
+                    <td class="label-cell text-center">1</td>
+                    <td class="label-cell" data-cell="C21">Iron Ore</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D21" id="cell-d21" tabindex="0">40.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E21" id="cell-e21" tabindex="0">50</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F21" id="cell-f21" tabindex="0">0.0%</td>
+                    <td class="label-cell" data-cell="G21">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H21" id="cell-h21" data-formula="=D21*E21">20.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">22</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">2</td>
+                    <td class="label-cell" data-cell="C22">Copper Ore</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D22" id="cell-d22" tabindex="0">40.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E22" id="cell-e22" tabindex="0">50</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F22" id="cell-f22" tabindex="0">0.0%</td>
+                    <td class="label-cell" data-cell="G22">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H22" id="cell-h22" data-formula="=D22*E22">20.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">23</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">3</td>
+                    <td class="label-cell color-gold-text" data-cell="C23">Gold Ore</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D23" id="cell-d23" tabindex="0">10.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E23" id="cell-e23" tabindex="0">200</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F23" id="cell-f23" tabindex="0">10.0%</td>
+                    <td class="label-cell" data-cell="G23">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H23" id="cell-h23" data-formula="=D23*E23">20.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">24</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">4</td>
+                    <td class="label-cell color-purple-text" data-cell="C24">Amethyst Ore</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D24" id="cell-d24" tabindex="0">6.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E24" id="cell-e24" tabindex="0">300</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F24" id="cell-f24" tabindex="0">20.0%</td>
+                    <td class="label-cell" data-cell="G24">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H24" id="cell-h24" data-formula="=D24*E24">18.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">25</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">5</td>
+                    <td class="label-cell color-red-text" data-cell="C25">Ruby Ore</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D25" id="cell-d25" tabindex="0">4.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E25" id="cell-e25" tabindex="0">500</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F25" id="cell-f25" tabindex="0">30.0%</td>
+                    <td class="label-cell" data-cell="G25">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H25" id="cell-h25" data-formula="=D25*E25">20.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">26</td>
+                    <td class="label-cell font-bold text-center" data-cell="A26">COINS</td>
+                    <td class="label-cell text-center">6</td>
+                    <td class="label-cell" data-cell="C26">Coins to buy gear</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D26" id="cell-d26" tabindex="0">20.0%</td>
+                    <td colspan="8" class="label-cell italic color-grey" data-cell="D26">20% drop rate for coins</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">27</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">28</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">29</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">30</td>
+                    <td colspan="12"></td>
+                  </tr>
+
+                  <!-- Section: Void Ores Economics & Gear (Stage 2) -->
+                  <tr>
+                    <td class="row-head">31</td>
+                    <td></td>
+                    <td colspan="3" class="section-title-cell font-bold text-left" data-cell="C31">VOID Economics (Stage 2)</td>
+                    <td class="label-cell" data-cell="C31">VOID</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell font-bold" data-cell="I31">Gear for VOID</td>
+                    <td class="label-cell font-bold" data-cell="J31">Feature</td>
+                    <td class="label-cell font-bold text-right" data-cell="K31">Cost in Pearls</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">32</td>
+                    <td class="label-cell font-bold text-center" data-cell="A32">ORES</td>
+                    <td class="label-cell text-center">1</td>
+                    <td class="label-cell" data-cell="C32">Bauxite</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D32" id="cell-d32" tabindex="0">40.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E32" id="cell-e32" tabindex="0">200</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F32" id="cell-f32" tabindex="0">0.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H32" id="cell-h32" data-formula="=D32*E32">80.00</td>
+                    <td class="label-cell" data-cell="I32">Shiny Pickaxe</td>
+                    <td class="label-cell color-grey" data-cell="J32">allows digging ores faster than the shiny shovel without excavator</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K32" id="cell-k32" tabindex="0">2</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">33</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">2</td>
+                    <td class="label-cell" data-cell="C33">Magnetite</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D33" id="cell-d33" tabindex="0">40.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E33" id="cell-e33" tabindex="0">200</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F33" id="cell-f33" tabindex="0">0.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H33" id="cell-h33" data-formula="=D33*E33">80.00</td>
+                    <td class="label-cell" data-cell="I33">Dynamite &amp; Ignition</td>
+                    <td class="label-cell color-grey" data-cell="J33">Creates a massive explosion giving you the equivalent of 100 digs</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K33" id="cell-k33" tabindex="0">25</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">34</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">3</td>
+                    <td class="label-cell color-gold-text" data-cell="C34">Pyrite</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D34" id="cell-d34" tabindex="0">10.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E34" id="cell-e34" tabindex="0">1000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F34" id="cell-f34" tabindex="0">10.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H34" id="cell-h34" data-formula="=D34*E34">100.00</td>
+                    <td class="label-cell" data-cell="I34">Quantum Time Extender</td>
+                    <td class="label-cell color-grey" data-cell="J34">gives you an extra 60 seconds</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K34" id="cell-k34" tabindex="0">2</td>
+                    <td class="label-cell color-grey" data-cell="L34">gives you an extra 60 seconds</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">35</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">4</td>
+                    <td class="label-cell color-cyan-text" data-cell="C35">Diamond</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D35" id="cell-d35" tabindex="0">6.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E35" id="cell-e35" tabindex="0">1200</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F35" id="cell-f35" tabindex="0">20.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H35" id="cell-h35" data-formula="=D35*E35">72.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">36</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">5</td>
+                    <td class="label-cell color-green-text" data-cell="C36">Emerald</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D36" id="cell-d36" tabindex="0">4.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E36" id="cell-e36" tabindex="0">5000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F36" id="cell-f36" tabindex="0">30.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H36" id="cell-h36" data-formula="=D36*E36">200.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">37</td>
+                    <td class="label-cell font-bold text-center" data-cell="A37">PEARLS</td>
+                    <td class="label-cell text-center">6</td>
+                    <td class="label-cell" data-cell="C37">Use Pearls to buy gear</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D37" id="cell-d37" tabindex="0">20.0%</td>
+                    <td colspan="8" class="label-cell italic color-grey" data-cell="D37">20% drop rate for Pearls</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">38</td>
+                    <td colspan="7"></td>
+                    <td class="label-cell font-bold text-right">Expected Gross EV:</td>
+                    <td class="excel-cell formula-cell text-right font-bold" data-cell="I38" id="cell-i38" data-formula="=SUM(H32:H36)">532.00</td>
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">39</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C39">Diamond Drilling Machine ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D39" id="cell-d39" tabindex="0">10000</td>
+                    <td colspan="7" class="label-cell color-grey">VOID version of Auto Excavator. Requires Gas.</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">40</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C40">Gas to run Diamond Drilling Machine ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D40" id="cell-d40" tabindex="0">200</td>
+                    <td class="label-cell text-center" data-cell="E40">1 Unit</td>
+                    <td class="label-cell color-grey" colspan="6" data-cell="F40">Unit of Gas. Powers drill for 10s.</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">41</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell" data-cell="C41">Storm Shield Protection Gear ($)</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D41" id="cell-d41" tabindex="0">10000</td>
+                    <td colspan="8" class="label-cell color-grey" data-cell="E41">once every 6 minutes (consumable on use)</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">42</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">43</td>
+                    <td></td>
+                    <td colspan="11" class="label-cell italic color-grey" data-cell="C43">Use Money to travel back to earth for $200,000 or your final destination asteroid NOVA for $ 500,000, ten times in size than VOID</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">44</td>
+                    <td></td>
+                    <td colspan="11" class="label-cell italic color-grey" data-cell="C44">All the balance money from VOID including all the value of the ores should travel with the player to their next destination, Earth or asteroid NOVA</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">45</td>
+                    <td></td>
+                    <td colspan="11" class="label-cell italic color-grey" data-cell="C45">In the new asteroid NOVA, players start with a ice axe, and can use crystals to buy new gear, an the initial timer is set to 4 minutes</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">46</td>
+                    <td></td>
+                    <td colspan="11" class="label-cell italic color-grey" data-cell="C46">Use the teleport button to complete the travel from VOID to EARTH or VOID to NOVA</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">47</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">48</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">49</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell font-bold" data-cell="C49">3rd Asteroid</td>
+                    <td class="label-cell font-bold" data-cell="D49">Nova</td>
+                    <td colspan="4"></td>
+                    <td class="label-cell font-bold" data-cell="I49">Gear for NOVA</td>
+                    <td class="label-cell font-bold" data-cell="J49">Feature</td>
+                    <td class="label-cell font-bold text-right" data-cell="K49">Cost in Crystal</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">50</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell" data-cell="C50">Options of Ores</td>
+                    <td colspan="5"></td>
+                    <td class="label-cell" data-cell="I50">Sledgehammer</td>
+                    <td class="label-cell color-grey" data-cell="J50">allows digging ores faster than the ice axe without excavator</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K50" id="cell-k50" tabindex="0">5</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">51</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell" data-cell="C51">NOVA</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell color-grey" data-cell="F51">Hold increases value over time</td>
+                    <td></td>
+                    <td></td>
+                    <td class="label-cell" data-cell="I51">Nuclear Explosion</td>
+                    <td class="label-cell color-grey" data-cell="J51">Creates a massive explosion giving you the equivalent of 1000 digs</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K51" id="cell-k51" tabindex="0">30</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">52</td>
+                    <td class="label-cell font-bold text-center" data-cell="A52">ORES</td>
+                    <td class="label-cell text-center">1</td>
+                    <td class="label-cell" data-cell="C52">Cryptonite</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D52" id="cell-d52" tabindex="0">40.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E52" id="cell-e52" tabindex="0">10000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F52" id="cell-f52" tabindex="0">0.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H52" id="cell-h52" data-formula="=D52*E52">4000.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">53</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">2</td>
+                    <td class="label-cell" data-cell="C53">Elerium</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D53" id="cell-d53" tabindex="0">40.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E53" id="cell-e53" tabindex="0">10000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F53" id="cell-f53" tabindex="0">0.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H53" id="cell-h53" data-formula="=D53*E53">4000.00</td>
+                    <td class="label-cell" data-cell="I53">Resonance Harmonic Stabilizer</td>
+                    <td class="label-cell color-grey" data-cell="J53">doubles probabilities of Obsidian, Warp-Stone, Infinity Gem</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K53" id="cell-k53" tabindex="0">10</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">54</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">3</td>
+                    <td class="label-cell color-gold-text" data-cell="C54">Obsidian</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D54" id="cell-d54" tabindex="0">10.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E54" id="cell-e54" tabindex="0">100000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F54" id="cell-f54" tabindex="0">10.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H54" id="cell-h54" data-formula="=D54*E54">10000.00</td>
+                    <td class="label-cell" data-cell="I54">Cosmic Water</td>
+                    <td class="label-cell color-grey" data-cell="J54">speeds up digging with Ice Axe by 50%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="K54" id="cell-k54" tabindex="0">5</td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">55</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">4</td>
+                    <td class="label-cell color-purple-text" data-cell="C55">Warp-Stone</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D55" id="cell-d55" tabindex="0">6.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E55" id="cell-e55" tabindex="0">500000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F55" id="cell-f55" tabindex="0">20.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H55" id="cell-h55" data-formula="=D55*E55">30000.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">56</td>
+                    <td class="label-cell font-bold text-center"></td>
+                    <td class="label-cell text-center">5</td>
+                    <td class="label-cell color-red-text" data-cell="C56">Infinity Gem</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D56" id="cell-d56" tabindex="0">4.0%</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="E56" id="cell-e56" tabindex="0">1000000</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="F56" id="cell-f56" tabindex="0">30.0%</td>
+                    <td class="label-cell">per 10 seconds</td>
+                    <td class="excel-cell formula-cell text-right" data-cell="H56" id="cell-h56" data-formula="=D56*E56">40000.00</td>
+                    <td colspan="4"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">57</td>
+                    <td class="label-cell font-bold text-center" data-cell="A57">CRYSTALS</td>
+                    <td class="label-cell text-center">6</td>
+                    <td class="label-cell" data-cell="C57">Use Crystals to buy gear</td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D57" id="cell-d57" tabindex="0">40.0%</td>
+                    <td colspan="8" class="label-cell italic color-grey" data-cell="E57">40% drop rate for Crystals</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">58</td>
+                    <td colspan="7"></td>
+                    <td class="label-cell font-bold text-right">Expected Gross EV:</td>
+                    <td class="excel-cell formula-cell text-right font-bold" data-cell="I58" id="cell-i58" data-formula="=SUM(H52:H56)">88000.00</td>
+                    <td colspan="3"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">59</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C59">Quantum Lattice Drill-Bore ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D59" id="cell-d59" tabindex="0">1000000</td>
+                    <td colspan="7" class="label-cell color-grey">NOVA version of Auto Excavator. Requires Tylium.</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">60</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C60">Tylium (Spaceship Fuel) ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D60" id="cell-d60" tabindex="0">100000</td>
+                    <td class="label-cell text-center" data-cell="E60">per Unit</td>
+                    <td class="label-cell color-grey" colspan="6" data-cell="F60">Powers Quantum Drill-Bore for 10s.</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">61</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C61">Storm Shield Protection Gear ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D61" id="cell-d61" tabindex="0">1000000</td>
+                    <td colspan="7" class="label-cell color-grey">NOVA version of Storm protection. once every 3 minutes.</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">62</td>
+                    <td colspan="12"></td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">63</td>
+                    <td></td>
+                    <td colspan="2" class="label-cell" data-cell="C63">Teleport back to earth ($)</td>
+                    <td></td>
+                    <td class="excel-cell editable-cell text-right color-yellow-bg" data-cell="D63" id="cell-d63" tabindex="0">50000000</td>
+                    <td colspan="7" class="label-cell color-grey">cost to initiate Hyperspace Jump back home.</td>
+                  </tr>
+                  <tr>
+                    <td class="row-head">64</td>
+                    <td colspan="12"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="excel-sheet-footer">
+              <div class="active-sheet-tab">🟢 Sheet1 (Asteroid Economics)</div>
+              <div class="sheet-status" id="excel-status-bar">Ready. Probability Total: 100%</div>
+            </div>
+          </div>
+
+          <!-- Validation Warning -->
+          <div class="validation-warning hidden" id="prob-validation-warning">
+            ⚠️ <strong>Probability Error:</strong> Your drop rate probabilities sum to <span id="prob-sum-display">90%</span>. In the real world, probabilities must add up to exactly 100%! The simulator has normalized them for game runs, but please adjust them in the spreadsheet to fix the model.
+          </div>
+          
+        </div>
+      </section>
+
+      <!-- Tab 3: Student Guide -->
+      <section class="tab-content" id="guide-view">
+        <div class="guide-container">
+          
+          <div class="card guide-card">
+            <h2>Day 5 Mathematics: Expected Value &amp; Resource Optimization</h2>
+            
+            <div class="guide-section">
+              <h3>1. Expected Value (EV) Contribution in Resource Gathering</h3>
+              <p>In game design, drop rates and item values determine how much wealth a player collects on average over time. To calculate the <strong>Expected Winnings per Dig</strong>, we sum the mathematical expectations of all outcomes:</p>
+              
+              <div class="formula-box-large">
+                <span class="formula-title">Gross Expected Value Formula:</span>
+                <span class="formula-math">Gross EV = ∑ (Probability_i × Value_i)</span>
+                <p>For our default game parameters:</p>
+                <ul class="math-derivation-list">
+                  <li><strong>Iron:</strong> 40% × $50 = $20</li>
+                  <li><strong>Copper:</strong> 40% × $50 = $20</li>
+                  <li><strong>Gold:</strong> 10% × $200 = $20</li>
+                  <li><strong>Amethyst:</strong> 6% × $300 = $18</li>
+                  <li><strong>Ruby:</strong> 4% × $500 = $20</li>
+                  <li><strong class="color-gold">Total Average per Dig (Gross EV):</strong> $20 + $20 + $20 + $18 + $20 = <strong>$98.00</strong></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="guide-section">
+              <h3>2. Holding vs. Selling: Compounding Appreciation</h3>
+              <p>When you mine a rare resource (Gold, Amethyst, Ruby), you have a strategic choice:</p>
+              <div class="decision-rules">
+                <div class="rule-box positive">
+                  <h4>💵 Sell Immediately</h4>
+                  <p>Guarantees liquidity. You get cash instantly to purchase high-value upgrades like the **Excavator** or **Fuel** to run it.</p>
+                </div>
+                <div class="rule-box fair">
+                  <h4>📈 Hold Ores in Inventory</h4>
+                  <p>Gold, Amethyst, and Ruby values increase by 10%, 20%, and 30% of their base values every 10 seconds. In 30 seconds, a Ruby goes from $500 to $950! This represents the **Time Value of Money** and opportunity cost.</p>
+                </div>
+              </div>
+              <p class="guide-note">💡 <strong>Optimal Strategy:</strong> Hold rare items until they appreciate to maximum values, but don't hold them so long that you restrict your ability to buy speed upgrades! Speed (digs per second) is a multiplier on your wealth generation rate.</p>
+            </div>
+
+            <div class="guide-section">
+              <h3>3. Probability Manipulation: The Metal Detector</h3>
+              <p>Equipping the **Metal Detector** triples the probabilities of finding Gold (10% → 30%), Amethyst (6% → 18%), and Ruby (4% → 12%). This raises the probability of rare drops from 20% to 60%! 
+              How does this change our Expected Value?
+              The remaining 40% probability is split between Iron and Copper (20% each).</p>
+              <div class="formula-box-large">
+                <span class="formula-title">New Expected Value calculation with Metal Detector:</span>
+                <span class="formula-math">EV_new = (20% × $50) + (20% × $50) + (30% × $200) + (18% × $300) + (12% × $500)</span>
+                <span class="formula-math">EV_new = $10 + $10 + $60 + $54 + $60 = <strong>$194.00 per dig!</strong></span>
+                <p>Equipping the Metal Detector nearly **doubles** your expected winnings per dig from $98.00 to $194.00. This shows the massive power of mathematical leverage!</p>
+              </div>
+            </div>
+
+
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 4: Leaderboard View -->
+      <section class="tab-content" id="leaderboard-view">
+        <div class="card leaderboard-card">
+          <div class="card-header">
+            <h2>🏆 Global Expedition Leaderboard</h2>
+            <button type="button" class="btn btn-secondary btn-sm" id="btn-clear-leaderboard">Reset Leaderboard</button>
+          </div>
+          <div class="leaderboard-body" style="padding: 20px;">
+            <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 20px; text-align: center;">
+              Top pilots sorted by Final Net Worth. Can you make it to the top spot?
+            </p>
+            <div class="table-wrapper">
+              <table class="data-table leaderboard-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px; text-align: center;">Rank</th>
+                    <th>Pilot Name</th>
+                    <th style="text-align: right;">Net Worth</th>
+                    <th style="text-align: right;">Cash</th>
+                    <th style="text-align: center;">Location (Drops)</th>
+                    <th style="text-align: right;">Total Digs</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboard-table-body">
+                  <tr>
+                    <td colspan="7" style="text-align: center; color: var(--color-text-secondary); padding: 30px;">
+                      No expedition telemetry recorded yet. Start mining to establish records!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card flags-card" style="margin-top: 25px;">
+          <div class="card-header">
+            <h2>🚩 Planted Flags on Asteroid TITAN</h2>
+          </div>
+          <div class="flags-body" style="padding: 20px;">
+            <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 20px; text-align: center;">
+              Flags left behind by brave pilots before teleporting to the VOID.
+            </p>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Pilot Name</th>
+                    <th>Flag Message</th>
+                    <th>Date Teleported</th>
+                  </tr>
+                </thead>
+                <tbody id="flags-table-body">
+                  <tr>
+                    <td colspan="3" style="text-align: center; color: var(--color-text-secondary); padding: 30px;">
+                      No flags planted on TITAN yet. Earn $100,000 to teleport and plant yours!
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+    <footer class="app-footer">
+      <p>&copy; 2026 Mindplexus. All Rights Reserved.</p>
+      <div class="mentor-credits" style="margin-top: 6px; font-size: 0.75rem; color: var(--color-text-secondary);">
+        Developed as a part of the Mindplexus - Real Maths, Money Logic and AI Tools - Pre-Teen Bootcamp
+      </div>
+      <div class="student-credits" style="margin-top: 4px; font-size: 0.75rem; color: var(--accent-gold);">
+        Built by Krithikesh, Sathya and Vikram
+      </div>
+    </footer>
+  </div>
+
+  <!-- Welcome / Start Game Modal Overlay -->
+  <div class="modal-overlay" id="welcome-modal">
+    <div class="excel-dialog-box welcome-dialog" style="max-width: 680px; border-radius: 12px;">
+      <div class="dialog-header">
+        <span class="dialog-title">🚀 Asteroid Mining Rush</span>
+      </div>
+      <div class="dialog-body" style="padding: 25px; text-align: center;">
+        <div class="welcome-brand" style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 15px;">
+          <a href="https://mind-plexus.com" target="_blank" rel="noopener noreferrer" style="text-decoration: none; border: none; display: block;">
+            <img src="logo_landscape_black.png" alt="Mindplexus Logo" style="height: 36px; width: auto; border: none; display: block;">
+          </a>
+        </div>
+        <h2 style="font-family: var(--font-display); font-size: 1.55rem; color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.6); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase;">
+          PRE-EXPEDITION BRIEFING
+        </h2>
+        <div class="student-credits" style="font-size: 0.85rem; font-weight: 700; color: var(--accent-gold); text-shadow: var(--shadow-gold); margin-bottom: 18px; letter-spacing: 0.5px;">
+          Built by Krithikesh, Sathya and Vikram
+        </div>
+        <p style="font-size: 0.9rem; color: #f8fafc; line-height: 1.6; margin-bottom: 20px; text-align: justify;">
+          Miner, prepare for launch! Space exploration has entered a new era. Bold miners are leaving Earth to extract rare ores on far away asteroids under incredibly difficult conditions, including severe dust storms and intense seismic tremors. Your ultimate goal is to return home to Earth with enough wealth to live as a Billionaire, and avoid getting stuck in outer space forever!
+        </p>
+
+        <!-- Visual Mission Map -->
+        <div class="mission-map-container">
+          <h3 style="font-family: var(--font-display); font-size: 1.05rem; color: var(--accent-cyan); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; text-align: center;">
+            🗺️ Mission Expedition Map
+          </h3>
+          <div class="mission-timeline">
+            <div class="timeline-step">
+              <div class="step-badge">1</div>
+              <div class="step-details">
+                <h4>Depart Earth</h4>
+                <p>Launch voyage</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <div class="step-badge">2</div>
+              <div class="step-details">
+                <h4>Mine Titan</h4>
+                <p>Ores &amp; gear</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <div class="step-badge">3</div>
+              <div class="step-details">
+                <h4>Teleport Void</h4>
+                <p>Diamond &amp; gas</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <div class="step-badge">4</div>
+              <div class="step-details">
+                <h4>Conquer Nova</h4>
+                <p>Cryptonite (4m limit)</p>
+              </div>
+            </div>
+            <div class="timeline-step">
+              <div class="step-badge">5</div>
+              <div class="step-details">
+                <h4>Billionaire</h4>
+                <p>Secure $50M+</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 20px; margin-bottom: 25px; text-align: left;">
+          <label for="welcome-name-input" style="display: block; font-size: 0.8rem; font-weight: bold; color: #e2e8f0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            👤 Pilot Designation:
+          </label>
+          <input type="text" id="welcome-name-input" value="Miner One" maxlength="15" 
+                 style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 15px; width: 100%; font-size: 1.05rem; color: #fff; font-family: var(--font-display); box-sizing: border-box; outline: none; margin-bottom: 5px; text-shadow: 0 0 8px rgba(0, 229, 255, 0.35); border-color: rgba(0, 229, 255, 0.4);" />
+          <span style="font-size: 0.72rem; color: #cbd5e1;">Your identity persists across future expeditions.</span>
+        </div>
+
+        <div class="dialog-footer" style="justify-content: center; margin-top: 10px;">
+          <button type="button" class="excel-dialog-btn default-btn btn-large welcome-launch-btn" id="btn-launch-game" style="font-size: 1.05rem; padding: 12px 30px; letter-spacing: 0.5px; width: 100%; border: none;">
+            🚀 Launch Mission
+          </button>
+        </div>
+        
+        <div class="welcome-footer" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px; font-size: 0.72rem; color: var(--color-text-secondary); text-align: center; display: flex; flex-direction: column; gap: 4px;">
+          <p>&copy; 2026 Mindplexus. All Rights Reserved.</p>
+          <p style="color: var(--accent-cyan);">Developed as a part of the Mindplexus - Real Maths, Money Logic and AI Tools - Pre-Teen Bootcamp</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flag Planting Modal Overlay -->
+  <div class="modal-overlay hidden" id="flag-modal">
+    <div class="excel-dialog-box flag-dialog" style="max-width: 450px; border-radius: 8px;">
+      <div class="dialog-header">
+        <span class="dialog-title">🚩 Plant Player Flag on TITAN</span>
+      </div>
+      <div class="dialog-body" style="padding: 25px; text-align: center;">
+        <h2 style="font-family: var(--font-display); font-size: 1.4rem; color: #ffffff; text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); margin-bottom: 15px; letter-spacing: 0.5px;">
+          LEAVING A FLAG
+        </h2>
+        <p style="font-size: 0.9rem; color: #f8fafc; line-height: 1.6; margin-bottom: 20px;">
+          Before leaving asteroid TITAN for the mysterious VOID, you must plant a flag to claim your achievements here. This flag will be left behind forever.
+        </p>
+        
+        <div style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); border-radius: 10px; padding: 15px 20px; margin-bottom: 25px; text-align: left;">
+          <label for="flag-text-input" style="display: block; font-size: 0.8rem; font-weight: bold; color: #e2e8f0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+            💬 Flag Message:
+          </label>
+          <input type="text" id="flag-text-input" value="Sathya, Vikram & Krithikesh's Station" maxlength="35" 
+                 style="background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 15px; width: 100%; font-size: 1.05rem; color: #fff; font-family: var(--font-display); box-sizing: border-box; outline: none; margin-bottom: 5px; border-color: rgba(255, 215, 0, 0.4); text-shadow: 0 0 8px rgba(255, 215, 0, 0.35);" />
+          <span style="font-size: 0.72rem; color: #cbd5e1;">Your pilot name will also be inscribed on this flag.</span>
+        </div>
+
+        <div class="dialog-footer" style="justify-content: center; margin-top: 10px;">
+          <button type="button" class="excel-dialog-btn default-btn btn-large" id="btn-confirm-flag" style="font-size: 1.05rem; padding: 12px 30px; letter-spacing: 0.5px; width: 100%; background: linear-gradient(135deg, var(--accent-gold) 0%, #cc8e35 100%); color: #000; box-shadow: var(--shadow-gold);">
+            🚩 Plant Flag &amp; Teleport
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Game Overlay / High Score Modal -->
+  <div class="modal-overlay hidden" id="end-game-modal">
+    <div class="excel-dialog-box end-game-dialog">
+      <div class="dialog-header">
+        <span class="dialog-title">🚀 Asteroid Mission Completed!</span>
+      </div>
+      <div class="dialog-body">
+        <p class="success-message text-center">Your excavation timer has expired. Telemetry analysis complete.</p>
+        
+        <div class="stats-box end-game-stats">
+          <div class="status-row highlight">
+            <span>Final Net Worth:</span>
+            <strong class="color-gold" id="end-net-worth">$0</strong>
+          </div>
+          <div class="status-row">
+            <span>Cash in Wallet:</span>
+            <strong id="end-cash">$0</strong>
+          </div>
+          <div class="status-row">
+            <span>Remaining Held Inventory Value:</span>
+            <strong id="end-inventory-val">$0</strong>
+          </div>
+          <div class="status-row">
+            <span>Total Digs Completed:</span>
+            <strong id="end-digs">0</strong>
+          </div>
+          <div class="status-row">
+            <span>Total Coins Found:</span>
+            <strong id="end-coins">0</strong>
+          </div>
+        </div>
+
+        <div class="high-score-banner hidden" id="high-score-banner">
+          👑 NEW PERSONAL HIGH SCORE! 👑
+        </div>
+
+        <!-- Mini Leaderboard -->
+        <div class="mini-leaderboard-container" style="margin-top: 15px; background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px;">
+          <h4 style="font-family: var(--font-display); font-size: 0.78rem; color: var(--accent-cyan); margin-bottom: 6px; text-align: center;">🏆 TOP EXPEDITIONS</h4>
+          <table class="mini-leaderboard" style="width: 100%; font-size: 0.72rem; border-collapse: collapse; color: var(--color-text-primary);">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: var(--color-text-secondary);">
+                <th style="padding: 3px; text-align: center;">#</th>
+                <th style="padding: 3px; text-align: left;">Pilot</th>
+                <th style="padding: 3px; text-align: right;">Net Worth</th>
+                <th style="padding: 3px; text-align: right;">Digs</th>
+              </tr>
+            </thead>
+            <tbody id="modal-leaderboard-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dialog-footer" style="justify-content: center; margin-top: 25px;">
+          <button type="button" class="excel-dialog-btn default-btn btn-large" id="btn-restart-game">
+            🎮 Mine Again
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warp Overlay -->
+  <div class="modal-overlay hidden" id="warp-overlay" style="z-index: 2000; background: #070913; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <div class="warp-tunnel"></div>
+    <h1 style="font-family: var(--font-display); color: var(--accent-purple); text-shadow: 0 0 15px rgba(208, 51, 255, 0.8); font-size: 2.2rem; margin-top: 20px; animation: pulseAlert 1.5s infinite; letter-spacing: 1.5px;">🌌 INITIATING HYPERSPACE JUMP...</h1>
+    <p style="color: #f8fafc; font-size: 1.1rem; margin-top: 10px; max-width: 400px; line-height: 1.5;">Preparing warp engines. Teleporting from TITAN to VOID...</p>
+  </div>
+
+  <!-- Explosion Overlay -->
+  <div class="modal-overlay hidden" id="explosion-overlay" style="z-index: 2000; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: background 0.3s ease;">
+    <div class="dynamite-fuse" id="explosion-fuse-icon">🧨</div>
+    <h1 id="explosion-title" style="font-family: var(--font-display); color: var(--accent-gold); text-shadow: 0 0 15px var(--accent-gold); font-size: 3rem; margin-top: 15px; letter-spacing: 1.5px; animation: pulseAlert 0.5s infinite;">DETONATING IN 3...</h1>
+    <p style="color: #cbd5e1; font-size: 1.1rem; margin-top: 5px;">Evacuating mining sector. High-yield charges armed.</p>
+  </div>
+
+  <!-- Storm Overlay -->
+  <div class="modal-overlay hidden" id="storm-overlay" style="z-index: 2000; background: rgba(15, 10, 5, 0.9); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <div class="storm-clouds">🌪️</div>
+    <h1 style="font-family: var(--font-display); color: var(--accent-ruby); text-shadow: 0 0 25px rgba(255, 45, 85, 0.9); font-size: 2.6rem; margin-top: 15px; letter-spacing: 1px; animation: shakeText 0.15s infinite;">🌪️ DUST STORM RAGING! 🌪️</h1>
+    <p id="storm-overlay-desc" style="color: #ffffff; font-size: 1.2rem; margin-top: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">BATTLING SOLAR WINDS...</p>
+  </div>
+
+  <!-- Destination Modal -->
+  <div class="modal-overlay hidden" id="destination-modal" style="z-index: 1000;">
+    <div class="excel-dialog-box destination-dialog" style="max-width: 480px; border-radius: 12px; background: #0b0d19; border: 1.5px solid var(--accent-cyan); box-shadow: 0 15px 35px rgba(0,0,0,0.8), var(--shadow-neon); color: #fff;">
+      <div class="dialog-header" style="background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid var(--border-color); color: #fff; padding: 12px 20px;">
+        <span class="dialog-title" style="color: #fff; font-family: var(--font-display); font-size: 0.95rem;">🌌 Choose Warp Destination</span>
+      </div>
+      <div class="dialog-body" style="padding: 25px; text-align: center;">
+        <h2 style="font-family: var(--font-display); font-size: 1.45rem; color: #ffffff; text-shadow: 0 0 10px rgba(0, 229, 255, 0.6); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase;">
+          SELECT NEXT EXPEDITION CORRIDOR
+        </h2>
+        <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px;">
+          Void resources harvested. Where would you like to direct your hyperspace engines? All held ores will be sold automatically before departure.
+        </p>
+        
+        <div class="destination-options-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+          <!-- Option 1: Earth -->
+          <div class="dest-card" id="dest-card-earth" style="background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 8px; padding: 15px; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+            <div style="flex: 1; padding-right: 15px;">
+              <h4 style="color: #fff; font-family: var(--font-display); font-size: 1.05rem; margin: 0 0 4px 0;">🌎 Return to Earth</h4>
+              <p style="color: #cbd5e1; font-size: 0.75rem; margin: 0;">Retire with your current earnings and record your score on the leaderboard.</p>
+            </div>
+            <button type="button" class="btn btn-action" id="btn-warp-earth" style="width: auto; padding: 8px 15px; font-size: 0.85rem; font-weight: bold; background: linear-gradient(135deg, #00e5ff 0%, #00838f 100%); min-width: 110px;">
+              Warp: $200K
+            </button>
+          </div>
+          
+          <!-- Option 2: Nova -->
+          <div class="dest-card" id="dest-card-nova" style="background: rgba(208, 51, 255, 0.05); border: 1px solid rgba(208, 51, 255, 0.2); border-radius: 8px; padding: 15px; text-align: left; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s ease;">
+            <div style="flex: 1; padding-right: 15px;">
+              <h4 style="color: #fff; font-family: var(--font-display); font-size: 1.05rem; margin: 0 0 4px 0;">🌌 Warp to Asteroid NOVA</h4>
+              <p style="color: #cbd5e1; font-size: 0.75rem; margin: 0;">Ten times larger than VOID! Rich with Cryptonite and Infinity Gems. 4m limit.</p>
+            </div>
+            <button type="button" class="btn btn-action" id="btn-warp-nova" style="width: auto; padding: 8px 15px; font-size: 0.85rem; font-weight: bold; background: linear-gradient(135deg, #d033ff 0%, #8e24aa 100%); min-width: 110px;">
+              Warp: $500K
+            </button>
+          </div>
+        </div>
+
+        <div class="dialog-footer" style="justify-content: center; margin-top: 10px;">
+          <button type="button" class="excel-dialog-btn cancel-btn" id="btn-cancel-destination" style="font-size: 0.9rem; padding: 10px 25px; border-radius: 6px; cursor: pointer; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: #fff;">
+            Cancel warp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Earthquake Overlay -->
+  <div class="modal-overlay hidden" id="earthquake-overlay" style="z-index: 2000; background: rgba(25, 15, 5, 0.95); backdrop-filter: blur(8px); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+    <div class="earthquake-crack" style="font-size: 5rem; animation: shakeText 0.1s infinite;">🌋</div>
+    <h1 style="font-family: var(--font-display); color: #ff9100; text-shadow: 0 0 25px rgba(255, 145, 0, 0.9); font-size: 2.6rem; margin-top: 15px; letter-spacing: 1px; animation: shakeText 0.15s infinite;">⚠️ SEISMIC EARTHQUAKE DETECTED! ⚠️</h1>
+    <p id="earthquake-overlay-desc" style="color: #ffffff; font-size: 1.2rem; margin-top: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">RUMBLES DETECTED: MINING CONTROL SYSTEMS RECALIBRATING...</p>
+  </div>
+
+  <!-- JavaScript Application -->
+  <script src="app.js"></script>
+</body>
+</html>
